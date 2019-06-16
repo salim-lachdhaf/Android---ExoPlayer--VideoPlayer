@@ -1,13 +1,9 @@
 package com.example.adtcvideoplayer;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -44,11 +40,8 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 
-import java.io.File;
-
 public class ExoPlayer extends Activity {
 
-    private static final int MY_PERMISSIONS_REQUEST = 100;
     private static ProgressDialog pDialog;
     private SimpleExoPlayer player;
     private InterstitialAd mInterstitialAd;
@@ -73,6 +66,12 @@ public class ExoPlayer extends Activity {
                 // Load the next interstitial.
                 mInterstitialAd.loadAd(new AdRequest.Builder().build());
             }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+                super.onAdFailedToLoad(i);
+                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+            }
         });
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -95,7 +94,6 @@ public class ExoPlayer extends Activity {
             playVideo(Uri.parse(getIntent().getStringExtra("URL")));
         } else if (getIntent() != null && getIntent().getData() != null && getIntent().getData().getPath() != null) {
             playVideo(Uri.parse(getIntent().getData().toString()));
-            //handlePermission();
         } else {
             Toast.makeText(this, android.R.string.httpErrorBadUrl, Toast.LENGTH_LONG).show();
             finish();
@@ -238,56 +236,5 @@ public class ExoPlayer extends Activity {
     @Override
     public void onBackPressed() {
         finish();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    File myFile = new File(getIntent().getData().getPath());
-                    playVideo(Uri.fromFile(myFile));
-                } else {
-                    Toast.makeText(this, "Permission Denied", Toast.LENGTH_LONG).show();
-                }
-                return;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request.
-        }
-    }
-
-    private void handlePermission() {
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Permission is not granted
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.READ_CONTACTS)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        MY_PERMISSIONS_REQUEST);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        } else {
-            File myFile = new File(getIntent().getData().getPath());
-            playVideo(Uri.parse(getIntent().getData().toString()));
-            // Permission has already been granted
-        }
     }
 }
