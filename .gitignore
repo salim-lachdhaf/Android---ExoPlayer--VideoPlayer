@@ -15,3 +15,7 @@
 /*[Dd]ebug*/
 /*[Rr]elease*/
 *private.xml
+*private_key.pepk
+*videoPlayerKey.jks
+*.pepk
+*.jks
